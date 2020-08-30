@@ -34,7 +34,7 @@
         group: "{{ssh_user}}"
     - name: "Import public key"
       lineinfile: 
-        path: "/home/{{ssh_user}}/.ssh"
+        path: "/home/{{ssh_user}}/.ssh/authorized_keys"
         line: "{{lookup('file',ssh_public_key)}}"
         state: present
         create: true

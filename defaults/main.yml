@@ -1,0 +1,5 @@
+---
+# defaults file for ssh
+allow_password_authentification: false
+set_sudo: true
+ssh_sudo_rule: "ALL=(ALL) NOPASSWD: ALL"

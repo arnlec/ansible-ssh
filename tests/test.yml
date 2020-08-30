@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - role: ssh
+      ssh_user: ansible
+      ssh_public_key: ansible_key.pub

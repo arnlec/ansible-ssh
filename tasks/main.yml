@@ -1,0 +1,61 @@
+---
+# tasks file for ssh
+
+- name: Check OS distribution
+  fail: 
+    msg: "{{ansible_distribution}} is not supported"
+  when: ansible_distribution != "Debian"
+
+- name: Install ssh server and client
+  apt:
+    name:
+      - openssh-server
+      - openssh-client
+    state: latest
+
+- name: Start sshd service
+  systemd:
+    name: sshd
+    enabled: yes
+    state: started
+
+- name: User settings 
+  block:
+    - name: "Create user"
+      user:
+        name: "{{ssh_user}}"
+        state: present
+    - name: "Create ssh folder"
+      file:
+        path: "/home/{{ssh_user}}/.ssh"
+        state: directory
+        mode: 0700
+        owner: "{{ssh_user}}"
+        group: "{{ssh_user}}"
+    - name: "Import public key"
+      lineinfile: 
+        path: "/home/{{ssh_user}}/.ssh"
+        line: "{{lookup('file',ssh_public_key)}}"
+        state: present
+        create: true
+        mode: 0600
+        owner: "{{ssh_user}}"
+        group: "{{ssh_user}}"
+      when: ssh_public_key is defined
+    - name: "Configure sudo for user"
+      template:
+        src: "sudo.j2"
+        dest: "/etc/sudoers.d/{{ssh_user}}"
+        mode: 0440
+      when: set_sudo == true
+  when: ssh_user is defined
+
+- name: Configure sshd server password authenthication
+  replace:
+    path: "/etc/ssh/sshd_config"
+    regexp: "^.*PasswordAuthentication.*$"
+    replace: "PasswordAuthentication {{'yes' if allow_password_authentification == true else 'no'}}"
+  notify: restart sshd
+
+
+

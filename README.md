@@ -26,6 +26,8 @@ Example Playbook
 ----------------
 
     - hosts: localhost
+      gather_facts: true
+      become: yes
       roles:
         - role: ssh
           ssh_user: ansible
